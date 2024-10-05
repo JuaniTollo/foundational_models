@@ -1,3 +1,4 @@
+import pdb
 from datasets import load_dataset, Dataset, load_from_disk
 from utils import to_pandas, convert_to_arrow
 import pandas as pd
@@ -9,6 +10,7 @@ from datetime import datetime, timedelta
 from gluonts.dataset.common import ListDataset
 from huggingface_hub import login, HfApi
 import pyarrow as pa
+import os
 
 # Load the specific dataset
 def save_gluonts_dataset(dataset, save_path):
@@ -115,6 +117,9 @@ current_directory = current_file_path.parent
 ds = load_dataset("autogluon/chronos_datasets", "exchange_rate", split="train")
 
 ################################################ TRAINING NEW DATASET ###################################################
+directory_path = "datasets/training/"
+os.makedirs(directory_path, exist_ok=True)
+
 new_ds = filter_data_points(ds, 80)
 
 # Convert the Dataset to a pandas DataFrame
@@ -123,12 +128,12 @@ new_dataset = changingDatasetStructure(new_df)
 new_ds2 = Dataset.from_pandas(new_dataset, split = ds.split, features = ds.features, info =ds.info)
 
 # Convert to Arrow format new dataset
-convert_exchange_dataset_to_arrow(new_ds2, str(current_directory / "datasets/newExchangeRateTraining.arrow"))
+convert_exchange_dataset_to_arrow(new_ds2, str(current_directory / "datasets/training/newExchangeRateTraining.arrow"))
 
 ################################################ TRAINING ORIGINAL DATASET ###################################################
 
 # Convert to Arrow format old dataset
-convert_exchange_dataset_to_arrow(ds, str(current_directory / "datasets/exchangeRateTraining.arrow"))
+convert_exchange_dataset_to_arrow(ds, str(current_directory / "datasets/training/exchangeRateTraining.arrow"))
 
 ################################################ EVALUATION NEW DATASET ###################################################
 new_ds_evaluation = filter_data_points(ds, 80)
@@ -142,7 +147,8 @@ new_dataset_evaluation = Dataset.from_pandas(new_dataset_evaluation, split = ds.
 
 print(type(new_dataset_evaluation))
 # Save the dataset in Hugging Face format
-new_dataset_evaluation.save_to_disk("./datasets/newExchangeRate_evaluation")
+
+new_dataset_evaluation.save_to_disk("./datasets/evaluation/newExchangeRate_evaluation")
 
 login(token="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")
 
@@ -151,3 +157,14 @@ api = HfApi()
 repo_url = api.create_repo(repo_id="juantollo/newExchangeRate", repo_type="dataset", private=True, exist_ok=True)
 
 new_dataset_evaluation.push_to_hub("juantollo/newExchangeRate")
+
+################################################ TEST ################################################ 
+
+# Convert the Dataset to a pandas DataFrame
+df_evaluation = to_pandas(ds)
+
+df_evaluation.to_csv("./datasets/evaluation/original_excgange_rate.csv")
+
+new_dataset_evaluation = changingDatasetStructure(df_evaluation)
+
+new_dataset_evaluation.to_csv("./datasets/evaluation/new_exchange_rate.csv")
