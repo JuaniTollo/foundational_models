@@ -43,11 +43,11 @@ per_device_train_batch_size = 16
 learning_rate = 0.001
 random_init = "true"
 shuffle_buffer_length = 10000
-output_model = f"/home/juantollo/foundational_models/models/context_{context_length}_pred_{prediction_length}_lr_{learning_rate}"
+output_model = f"/context_{context_length}_pred_{prediction_length}_lr_{learning_rate}"
 
 yaml_content = f"""
 training_data_paths:
-  - "/home/juantollo/foundational_models/datasets/exchange_rate_new_dataset.arrow"
+  - "../../datasets/training/newExchangeRateTraining.arrow"
 probability:
   - 1.0
 context_length: {context_length}
@@ -94,7 +94,7 @@ print("Archivo YAML guardado como config.yaml")
 
 # Smail Yalm slithy modified
 yaml_content = """training_data_paths:
-- "/home/juantollo/foundational_models/datasets/exchange_rate.arrow"
+- "../datasets/exchange_rate.arrow"
 probability:
 - 1
 context_length: 512

@@ -38,7 +38,7 @@ def make_forecast(pipeline, context_data, prediction_length=8, num_samples=20):
     )
     return forecast
 
-def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline):
+def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline, plot_path):
     """Plot forecasts for all 8 currencies in a single figure with 8 subplots."""
     fig, axes = plt.subplots(4, 2, figsize=(16, 16))  # 4x2 grid of subplots
 
@@ -78,7 +78,7 @@ def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline
         ax.grid()
 
     plt.tight_layout()
-    plt.savefig("forecasts_all_currencies.png")
+    plt.savefig(plot_path)
 
 def main():
     # Create the forecasting pipeline
@@ -87,8 +87,10 @@ def main():
     # Load and prepare the datasets
     df_exchange_rate, df_new_dataset = load_and_prepare_data()
     
+    pdb.set_trace()
+
     # Plot forecasts for all currencies
-    plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline)
+    plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline, "forecasts_all_currencies.png")
 
 if __name__ == "__main__":
     main()
