@@ -58,10 +58,10 @@ def write_experiments_yalms(a_model_list, a_lr_list, output_dir):
             prediction_length = 64
             max_steps = 5000
             save_steps = 1000
-            per_device_train_batch_size = 32
+            per_device_train_batch_size = 16
             learning_rate = a_lr
             random_init = "false"
-            shuffle_buffer_length = 10000
+            shuffle_buffer_length = 5000
             model = a_model
             #output_model = f"/{model}_lr_{learning_rate}_random_init{random_init}"
             output_model = f"{model.replace('/', '_')}_lr_{learning_rate}"
