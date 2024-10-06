@@ -55,10 +55,10 @@ def write_experiments_yalms(a_model_list, a_lr_list, output_dir):
     for a_model in a_model_list:
         for a_lr in a_lr_list:
             context_length = 960
-            prediction_length = 32
+            prediction_length = 64
             max_steps = 5000
             save_steps = 1000
-            per_device_train_batch_size = 64
+            per_device_train_batch_size = 32
             learning_rate = a_lr
             random_init = "false"
             shuffle_buffer_length = 10000
