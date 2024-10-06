@@ -1,11 +1,12 @@
 ################################################################# EVALUATION ###############################################################
 
 new_exchange_rate_zero_shot = """
-- name: exchange_rate
-  hf_repo: juantollo/new_exchange_rate"
-  offset: -240
-  prediction_length: 240
+- name: 'default'
+  hf_repo: juantollo/newExchangeRate
+  offset: -64
+  prediction_length: 64
   num_rolls: 1
+
 """
 
 exchange_zero_shot = """
@@ -34,18 +35,39 @@ for yalm in yalms.keys():
         file.write(yalms[yalm])
     print(f"Archivo YAML {yalm} guardado como config.yaml")
 
-################################################################# TRAINING ###############################################################
-context_length = 960
-prediction_length = 240
-max_steps = 15000
-save_steps = 1000
-per_device_train_batch_size = 16
-learning_rate = 0.001
-random_init = "true"
-shuffle_buffer_length = 10000
-output_model = f"/context_{context_length}_pred_{prediction_length}_lr_{learning_rate}"
+import os
+import glob
 
-yaml_content = f"""
+################################################################ TRAINING ###############################################################
+def erased_not_experiment_yammls(output_dir):
+    # Find all .yaml files in the specified directory
+    yaml_files = glob.glob(os.path.join(output_dir, "*.yaml"))
+
+    # Delete each .yaml file
+    for file in yaml_files:
+        try:
+            os.remove(file)
+            print(f"Deleted: {file}")
+        except Exception as e:
+            print(f"Error deleting {file}: {e}")
+
+def write_experiments_yalms(a_model_list, a_lr_list, output_dir):
+    for a_model in a_model_list:
+        for a_lr in a_lr_list:
+            context_length = 64
+            prediction_length = 64
+            max_steps = 10000
+            save_steps = 2500
+            per_device_train_batch_size = 16
+            learning_rate = a_lr
+            random_init = "true"
+            shuffle_buffer_length = 10000
+            model = a_model
+            #output_model = f"/{model}_lr_{learning_rate}"
+            output_model = f"{model.replace('/', '_')}_lr_{learning_rate}"
+
+
+            yaml_content = f"""
 training_data_paths:
   - "../../datasets/training/newExchangeRateTraining.arrow"
 probability:
@@ -54,7 +76,7 @@ context_length: {context_length}
 prediction_length: {prediction_length}
 min_past: 60
 max_steps: {max_steps}
-save_steps: {max_steps}
+save_steps: {save_steps}
 log_steps: 500
 per_device_train_batch_size: {per_device_train_batch_size}
 learning_rate: {learning_rate}
@@ -62,7 +84,7 @@ optim: adamw_torch_fused
 num_samples: 20
 shuffle_buffer_length: {shuffle_buffer_length}
 gradient_accumulation_steps: 1
-model_id: google/t5-efficient-small
+model_id: {model}
 model_type: seq2seq
 random_init: {random_init}
 tie_embeddings: true
@@ -80,54 +102,22 @@ dataloader_num_workers: 1
 max_missing_prop: 0.9
 use_eos_token: true
 """
-output_dir = f"chronos-forecasting/scripts/training/configs"
-import os
-# Ensure the output directory exists
-os.makedirs(output_dir, exist_ok=True)
+            # Ensure the output directory exists
+            os.makedirs(output_dir, exist_ok=True)
 
-# Guardar el contenido YAML en un archivo
-with open(f"{output_dir}/configs_new_dataset_context_{context_length}_pred_{prediction_length}_lr_{learning_rate}.yaml", "w") as file:
-    file.write(yaml_content)
-print("Archivo YAML guardado como config.yaml")
+            # Save the YAML content to a file
+            yaml_file_path = os.path.join(output_dir, f"{output_model}.yaml")
+            with open(yaml_file_path, "w") as file:
+                file.write(yaml_content)
+            print(f"YAML file saved as {yaml_file_path}")
 
+def main():
+    # Define the directory containing the .yaml files
+    output_dir = "chronos-forecasting/scripts/training/configs"
+    # Erase old YAMLs if necessary
+    erased_not_experiment_yammls(output_dir)
+    # Write new YAML files
+    write_experiments_yalms(["google/t5-efficient-base", "google/t5-efficient-small"], [1e-3, 1e-4, 3e-4], output_dir)
 
-
-# Smail Yalm slithy modified
-yaml_content = """training_data_paths:
-- "../datasets/exchange_rate.arrow"
-probability:
-- 1
-context_length: 512
-prediction_length: 64
-min_past: 60
-max_steps: 200_000
-save_steps: 100_000
-log_steps: 500
-per_device_train_batch_size: 32
-learning_rate: 0.001
-optim: adamw_torch_fused
-num_samples: 20
-shuffle_buffer_length: 100_000
-gradient_accumulation_steps: 1
-model_id: google/t5-efficient-small
-model_type: seq2seq
-random_init: true
-tie_embeddings: true
-output_dir: ./output/
-tf32: true
-torch_compile: true
-tokenizer_class: "MeanScaleUniformBins"
-tokenizer_kwargs:
-  low_limit: -15.0
-  high_limit: 15.0
-n_tokens: 4096
-lr_scheduler_type: linear
-warmup_ratio: 0.0
-dataloader_num_workers: 1
-max_missing_prop: 0.9
-use_eos_token: true"""
-
-# Guardar el contenido YAML en un archivo
-with open(f"{output_dir}/chronos-t5-small.yaml", "w") as file:
-    file.write(yaml_content)
-print("Archivo YAML guardado como config.yaml")
+if __name__ == "__main__":
+    main()

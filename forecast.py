@@ -5,7 +5,6 @@ from datasets import load_dataset, load_from_disk
 from utils import to_pandas
 import matplotlib.pyplot as plt
 import numpy as np
-import pdb
 
 def load_new_dataset():
     dataset = load_dataset('juantollo/newExchangeRate', split='train')
@@ -38,7 +37,7 @@ def make_forecast(pipeline, context_data, prediction_length=8, num_samples=20):
     )
     return forecast
 
-def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline, plot_path):
+def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline_original_model, pipeline_new_model, plot_path):
     """Plot forecasts for all 8 currencies in a single figure with 8 subplots."""
     fig, axes = plt.subplots(4, 2, figsize=(16, 16))  # 4x2 grid of subplots
 
@@ -52,11 +51,11 @@ def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline
         
         # Get the positions mod 8 + i for the new dataset
         positions_mod_8 = np.arange(i, len(df_new_dataset), 8)
-        new_forecast = make_forecast(pipeline, df_new_dataset.iloc[positions_mod_8[-576:-64]], prediction_length=64, num_samples=20)
+        new_forecast = make_forecast(pipeline_new_model, df_new_dataset.iloc[positions_mod_8[-576:-64]], prediction_length=64, num_samples=20)
         new_forecast_8_mod = new_forecast[..., ::8]
 
         # Make the forecast for the historical data
-        forecast = make_forecast(pipeline, df_currency_context, prediction_length=8, num_samples=20)
+        forecast = make_forecast(pipeline_original_model, df_currency_context, prediction_length=8, num_samples=20)
 
         # Calculate quantiles
         forecast_index = np.arange(len(df_currency_context), len(df_currency_context) + 8)
@@ -82,15 +81,14 @@ def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline
 
 def main():
     # Create the forecasting pipeline
-    pipeline = create_pipeline()
-    
+    pipeline_original_model = create_pipeline()
+    pipeline_new_model = create_pipeline("/content/foundational_models/context_960_pred_240_lr_0.001/run-2/checkpoint-final", "cuda")
+
     # Load and prepare the datasets
     df_exchange_rate, df_new_dataset = load_and_prepare_data()
     
-    pdb.set_trace()
-
     # Plot forecasts for all currencies
-    plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline, "forecasts_all_currencies.png")
+    plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline_original_model,pipeline_new_model, "forecasts_all_currencies.png")
 
 if __name__ == "__main__":
     main()

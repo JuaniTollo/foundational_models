@@ -10,7 +10,7 @@ python evaluation/evaluate.py evaluation/configs/exchange_zero_shot_zero_shot.ya
 
 ## Evaluation for new dataset but original weights
 
-python evaluation/evaluate.py evaluation/configs/new_exchange_rate_zero_shot.yaml evaluation/results/chronos-t5-small-zero-shot-new-exchange-rate.csv     --chronos-model-id "amazon/chronos-t5-small"     --batch-size=32     --device=cuda:0     --num-samples 20
+x`
 
 ## VM Settings
 
