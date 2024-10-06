@@ -54,16 +54,16 @@ def erased_not_experiment_yammls(output_dir):
 def write_experiments_yalms(a_model_list, a_lr_list, output_dir):
     for a_model in a_model_list:
         for a_lr in a_lr_list:
-            context_length = 64
-            prediction_length = 64
-            max_steps = 10000
-            save_steps = 2500
-            per_device_train_batch_size = 16
+            context_length = 960
+            prediction_length = 32
+            max_steps = 5000
+            save_steps = 1000
+            per_device_train_batch_size = 64
             learning_rate = a_lr
-            random_init = "true"
+            random_init = "false"
             shuffle_buffer_length = 10000
             model = a_model
-            #output_model = f"/{model}_lr_{learning_rate}"
+            #output_model = f"/{model}_lr_{learning_rate}_random_init{random_init}"
             output_model = f"{model.replace('/', '_')}_lr_{learning_rate}"
 
 
@@ -77,7 +77,7 @@ prediction_length: {prediction_length}
 min_past: 60
 max_steps: {max_steps}
 save_steps: {save_steps}
-log_steps: 500
+log_steps: 100
 per_device_train_batch_size: {per_device_train_batch_size}
 learning_rate: {learning_rate}
 optim: adamw_torch_fused
@@ -97,7 +97,7 @@ tokenizer_kwargs:
   high_limit: 15.0
 n_tokens: 4096
 lr_scheduler_type: linear
-warmup_ratio: 0.0
+warmup_ratio: 0.1
 dataloader_num_workers: 1
 max_missing_prop: 0.9
 use_eos_token: true
