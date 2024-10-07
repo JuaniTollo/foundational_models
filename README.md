@@ -6,11 +6,11 @@ We import exchange rate dataset and we create new exchange rante datasets
 
 ## Evaluation for the original dataset with the original model weights
 
-python evaluation/evaluate.py evaluation/configs/exchange_zero_shot_zero_shot.yaml evaluation/results/chronos-t5-small-zero-shot.csv     --chronos-model-id "amazon/chronos-t5-small"     --batch-size=32     --device=cuda:0     --num-samples 20
+python evaluation/evaluate.py evaluation/configs/exchange_zero_shot_test.yaml evaluation/results/chronos-t5-small-zero-shotORIGINAL.csv     --chronos-model-id "amazon/chronos-t5-small"     --batch-size=32     --device=cuda:0     --num-samples 20
 
 ## Evaluation for new dataset but original weights
 
-x`
+python evaluation/evaluate.py /home/juantollo/foundational_models/chronos-forecasting/scripts/evaluation/configs/new_exchange_rate_zero_shot.yaml evaluation/results/chronos-t5-small-zero-shot.csv     --chronos-model-id "/home/juantollo/foundational_models/chronos-forecasting/scripts/er_models/5000"    --batch-size=3
 
 ## VM Settings
 

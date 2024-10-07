@@ -28,6 +28,7 @@ def create_pipeline(model_name="amazon/chronos-t5-large", device="cuda"):
         torch_dtype=torch.bfloat16,
     )
 
+
 def make_forecast(pipeline, context_data, prediction_length=8, num_samples=20):
     """Generate the forecast using the pipeline."""
     forecast = pipeline.predict(
@@ -51,7 +52,7 @@ def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline
         
         # Get the positions mod 8 + i for the new dataset
         positions_mod_8 = np.arange(i, len(df_new_dataset), 8)
-        new_forecast = make_forecast(pipeline_new_model, df_new_dataset.iloc[positions_mod_8[-576:-64]], prediction_length=64, num_samples=20)
+        new_forecast = make_forecast(pipeline_new_model, df_new_dataset.iloc[positions_mod_8[-128:-64]], prediction_length=64, num_samples=20)
         new_forecast_8_mod = new_forecast[..., ::8]
 
         # Make the forecast for the historical data
@@ -67,6 +68,8 @@ def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline
         ax.plot(df_currency_context.index, df_currency_context["target"], color="royalblue", label="historical data")
         ax.plot(forecast_index, median, color="tomato", label="median forecast")
         ax.plot(forecast_index, df_currency_true["target"].values, color="green", label="ground truth")
+        ax.plot(df_currency_context.index, df_new_dataset.iloc[positions_mod_8[-128:-64]]["target"], color="black", label="median new forecast")
+        ax.plot(forecast_index, df_new_dataset.iloc[positions_mod_8[-8:]]["target"], color="black", label="median new forecast")
         ax.plot(forecast_index, median_new, color="purple", label="median new forecast")
         ax.fill_between(forecast_index, low_new, high_new, color="#D8BFD8", alpha=0.3, label="80% prediction interval new")
         ax.fill_between(forecast_index, low, high, color="tomato", alpha=0.3, label="80% prediction interval")
@@ -79,16 +82,31 @@ def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline
     plt.tight_layout()
     plt.savefig(plot_path)
 
-def main():
+def main(new_model_path=None):
     # Create the forecasting pipeline
     pipeline_original_model = create_pipeline()
-    pipeline_new_model = create_pipeline("/content/foundational_models/context_960_pred_240_lr_0.001/run-2/checkpoint-final", "cuda")
+    
+    # Check if a new model path is provided, then create a pipeline for it
+    if new_model_path:
+        pipeline_new_model = create_pipeline(new_model_path, "cuda")
+    else:
+        pipeline_new_model = None
 
     # Load and prepare the datasets
     df_exchange_rate, df_new_dataset = load_and_prepare_data()
     
     # Plot forecasts for all currencies
-    plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline_original_model,pipeline_new_model, "forecasts_all_currencies.png")
+    plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline_original_model, pipeline_new_model, "plots/forecasts_all_currencies_fine_tuned.png")
+import argparse
 
 if __name__ == "__main__":
-    main()
+    # Set up argument parsing
+    parser = argparse.ArgumentParser(description="Forecasting script")
+    parser.add_argument('new_model_path', type=str, help='Path to the new model')
+    
+    # Parse arguments
+    args = parser.parse_args()
+    
+    # Pass the new_model_path argument to main
+    main(new_model_path=args.new_model_path)
+
