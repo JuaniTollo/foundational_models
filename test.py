@@ -9,17 +9,19 @@ import subprocess
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils import to_pandas
+import pdb
 
 class TestDataset(unittest.TestCase):
-
     def setUp(self):
         # Sample data to create a Hugging Face dataset
         self.dataset = load_dataset("autogluon/chronos_datasets", "exchange_rate", split="train")
+        self.newdataset = load_dataset("juantollo/newExchangeRate", split="train")
+        self.dataset_df = to_pandas(self.dataset)
+        self.newdataset_df = to_pandas(self.newdataset)
 
     def test01_timestamp_consistency(self):
         # Convert dataset to a DataFrame for easier processing
         df = self.dataset.to_pandas()
-        
         # Group by 'id' to get timestamps for each series
         timestamp_groups = df.groupby('id')['timestamp'].apply(list)
         
@@ -33,6 +35,27 @@ class TestDataset(unittest.TestCase):
         
         print("All datasets have consistent timestamps.")
     
+    def test02_equal_transformation(self):
+        #pdb.set_trace()
+        for i in range (0,8):
+            #df = self.dataset_df[self.dataset_df["id"] == f"currency_{1}"]["target"].values
+            currency_id = f"currency_{i+1}"
+            # Filter data for the current currency in the original dataset
+            original_currency_values = self.dataset_df[self.dataset_df["id"] == currency_id]["target"].values
+
+            # Determine positions in the new dataset based on mod 8 logic
+            positions_mod_8 = np.arange(i, len(self.newdataset_df), 8)
+            
+            # Extract values from the new dataset at these positions
+            new_dataset_values_mod_8 = self.newdataset_df.iloc[positions_mod_8]["target"].values
+            
+            # Compare the values in the new dataset mod 8 positions with the original dataset
+            # Assertion for values at mod 8 positions
+            assert np.array_equal(
+                new_dataset_values_mod_8, 
+                original_currency_values[-len(new_dataset_values_mod_8):]
+            ), f"Mismatch found for Currency {i+1} at mod 8 positions."
+
     def test03_evaluate_exchange_rate(self):
         # Add the path to the scripts directory to the system path
         sys.path.append(os.path.abspath('../chronos-forecasting/scripts'))
@@ -70,4 +93,4 @@ class TestDataset(unittest.TestCase):
             self.fail(f"Evaluation script failed with error: {e}\n{e.stderr}")
 
 if __name__ == '__main__':
-    unittest.main(argv=['', 'TestDataset.test03_evaluate_exchange_rate'], exit=False)
+    unittest.main(argv=['', 'TestDataset.test02_equal_transformation'], exit=False)

@@ -5,6 +5,7 @@ from datasets import load_dataset, load_from_disk
 from utils import to_pandas
 import matplotlib.pyplot as plt
 import numpy as np
+import pdb
 
 def load_new_dataset():
     dataset = load_dataset('juantollo/newExchangeRate', split='train')
@@ -16,7 +17,6 @@ def load_and_prepare_data():
     df_new_dataset = load_new_dataset()
     ds_exchange_rate = load_dataset("autogluon/chronos_datasets", "exchange_rate", split="train")
     df_exchange_rate = to_pandas(ds_exchange_rate)
-    
     # Return both datasets
     return df_exchange_rate, df_new_dataset
 
@@ -27,7 +27,6 @@ def create_pipeline(model_name="amazon/chronos-t5-large", device="cuda"):
         device_map=device,
         torch_dtype=torch.bfloat16,
     )
-
 
 def make_forecast(pipeline, context_data, prediction_length=8, num_samples=20):
     """Generate the forecast using the pipeline."""
@@ -51,9 +50,12 @@ def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline
         df_currency_context = df_currency.iloc[-72:-8].reset_index(drop=True)
         
         # Get the positions mod 8 + i for the new dataset
-        positions_mod_8 = np.arange(i, len(df_new_dataset), 8)
-        new_forecast = make_forecast(pipeline_new_model, df_new_dataset.iloc[positions_mod_8[-128:-64]], prediction_length=64, num_samples=20)
-        new_forecast_8_mod = new_forecast[..., ::8]
+        positions_mod_8 = np.arange(i, 64, 8)
+        ### FIX BUG ###
+        new_forecast = make_forecast(pipeline_new_model, df_new_dataset.iloc[-512:-64], prediction_length=64, num_samples=20)
+        # new_forecast = make_forecast(pipeline_new_model, df_new_dataset.iloc[positions_mod_8[-128:-64]], prediction_length=64, num_samples=20)
+
+        new_forecast_8_mod = new_forecast[:,:,positions_mod_8]
 
         # Make the forecast for the historical data
         forecast = make_forecast(pipeline_original_model, df_currency_context, prediction_length=8, num_samples=20)
@@ -65,13 +67,18 @@ def plot_forecasts_for_all_currencies(df_exchange_rate, df_new_dataset, pipeline
 
         # Plotting on the appropriate subplot
         ax = axes[i // 2, i % 2]  # Locate the correct subplot
-        ax.plot(df_currency_context.index, df_currency_context["target"], color="royalblue", label="historical data")
+        #pdb.set_trace()
+        # ax.plot(df_currency_context.index, df_currency_context["target"], color="royalblue", label="historical data")
+        # ax.plot(forecast_index, df_currency_true["target"].values, color="royalblue", label="ground truth")
+        # Combine the indices and target values from df_currency_context and df_currency_true
+        combined_index = np.concatenate([df_currency_context.index, forecast_index])
+        combined_target = np.concatenate([df_currency_context["target"].values, df_currency_true["target"].values])
+
+        # Plot the combined data
+        ax.plot(combined_index, combined_target, color="royalblue", label="historical data + ground truth")
         ax.plot(forecast_index, median, color="tomato", label="median forecast")
-        ax.plot(forecast_index, df_currency_true["target"].values, color="green", label="ground truth")
-        ax.plot(df_currency_context.index, df_new_dataset.iloc[positions_mod_8[-128:-64]]["target"], color="black", label="median new forecast")
-        ax.plot(forecast_index, df_new_dataset.iloc[positions_mod_8[-8:]]["target"], color="black", label="median new forecast")
         ax.plot(forecast_index, median_new, color="purple", label="median new forecast")
-        ax.fill_between(forecast_index, low_new, high_new, color="#D8BFD8", alpha=0.3, label="80% prediction interval new")
+        ax.fill_between(forecast_index, low_new, high_new, color="purple", alpha=0.3, label="80% prediction interval new")
         ax.fill_between(forecast_index, low, high, color="tomato", alpha=0.3, label="80% prediction interval")
         
         # Title and legend

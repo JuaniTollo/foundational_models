@@ -2,7 +2,7 @@
 .arrow
 datasets/
 output/
-model/
+es_models/
 chronos-forecasting/
 __pycache__/
 *.pyc
