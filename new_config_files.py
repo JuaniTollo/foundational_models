@@ -6,7 +6,6 @@ new_exchange_rate_zero_shot = """
   offset: -64
   prediction_length: 64
   num_rolls: 1
-
 """
 
 exchange_zero_shot = """
@@ -56,12 +55,12 @@ def write_experiments_yalms(a_model_list, a_lr_list, output_dir):
         for a_lr in a_lr_list:
             context_length = 960
             prediction_length = 64
-            max_steps = 5000
+            max_steps = 10000
             save_steps = 1000
             per_device_train_batch_size = 16
             learning_rate = a_lr
             random_init = "false"
-            shuffle_buffer_length = 5000
+            shuffle_buffer_length = 10000
             model = a_model
             #output_model = f"/{model}_lr_{learning_rate}_random_init{random_init}"
             output_model = f"{model.replace('/', '_')}_lr_{learning_rate}"
@@ -117,7 +116,7 @@ def main():
     # Erase old YAMLs if necessary
     erased_not_experiment_yammls(output_dir)
     # Write new YAML files
-    write_experiments_yalms(["google/t5-efficient-base", "google/t5-efficient-small"], [1e-3, 1e-4, 3e-4], output_dir)
+    write_experiments_yalms(["google/t5-efficient-base", "google/t5-efficient-small", "google/t5-efficient-base", "google/t5-efficient-large"], [0.001], output_dir)
 
 if __name__ == "__main__":
     main()
