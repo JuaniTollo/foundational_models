@@ -1,3 +1,10 @@
+## At same level of foundational models...
+git clone https://github.com/amazon-science/chronos-forecasting.git
+cd chronos-forecasting
+pip install -e ".[evaluation]"
+pip install -e ".[training]"
+
+
 ## Create new datasets and configs files
 
 We import exchange rate dataset and we create new exchange rante datasets

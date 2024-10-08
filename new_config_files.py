@@ -1,10 +1,10 @@
 ################################################################# EVALUATION ###############################################################
 
-new_exchange_rate_zero_shot = """
+new_exchange_rate_in_domain = """
 - name: 'default'
   hf_repo: juantollo/newExchangeRate
-  offset: -64
-  prediction_length: 64
+  offset: -4128
+  prediction_length: 768
   num_rolls: 1
 """
 
@@ -19,18 +19,18 @@ exchange_zero_shot = """
 exchange_zero_shot_test = """
 - name: exchange_rate
   hf_repo: autogluon/chronos_datasets
-  offset: -10
-  prediction_length: 10
+  offset: -1
+  prediction_length: 1
   num_rolls: 1
 """
 
-yalms = {"new_exchange_rate_zero_shot": new_exchange_rate_zero_shot,
+yalms = {"new_exchange_rate_in_domain": new_exchange_rate_in_domain,
          "exchange_zero_shot": exchange_zero_shot,
          "exchange_zero_shot_test": exchange_zero_shot_test
          } 
 
 for yalm in yalms.keys():
-    with open(f"./chronos-forecasting/scripts/evaluation/configs/{yalm}.yaml", "w") as file:
+    with open(f"../chronos-forecasting/scripts/evaluation/configs/{yalm}.yaml", "w") as file:
         file.write(yalms[yalm])
     print(f"Archivo YAML {yalm} guardado como config.yaml")
 
@@ -53,22 +53,19 @@ def erased_not_experiment_yammls(output_dir):
 def write_experiments_yalms(a_model_list, a_lr_list, output_dir):
     for a_model in a_model_list:
         for a_lr in a_lr_list:
-            context_length = 960
-            prediction_length = 64
+            context_length = 4128
+            prediction_length = 768
             max_steps = 10000
-            save_steps = 1000
-            per_device_train_batch_size = 16
+            save_steps = 2000
+            per_device_train_batch_size = 8
             learning_rate = a_lr
             random_init = "false"
             shuffle_buffer_length = 10000
             model = a_model
-            #output_model = f"/{model}_lr_{learning_rate}_random_init{random_init}"
-            output_model = f"{model.replace('/', '_')}_lr_{learning_rate}"
-
-
+            output_model = f"{model.replace('/', '_')}"
             yaml_content = f"""
 training_data_paths:
-  - "../../datasets/training/newExchangeRateTraining.arrow"
+  - "../../foundational_models/datasets/training/newExchangeRateTraining.arrow"
 probability:
   - 1.0
 context_length: {context_length}
@@ -76,7 +73,7 @@ prediction_length: {prediction_length}
 min_past: 60
 max_steps: {max_steps}
 save_steps: {save_steps}
-log_steps: 100
+log_steps: 200
 per_device_train_batch_size: {per_device_train_batch_size}
 learning_rate: {learning_rate}
 optim: adamw_torch_fused
@@ -112,11 +109,11 @@ use_eos_token: true
 
 def main():
     # Define the directory containing the .yaml files
-    output_dir = "chronos-forecasting/scripts/training/configs"
+    output_dir = "../chronos-forecasting/scripts/training/configs"
     # Erase old YAMLs if necessary
     erased_not_experiment_yammls(output_dir)
     # Write new YAML files
-    write_experiments_yalms(["google/t5-efficient-base", "google/t5-efficient-small", "google/t5-efficient-base", "google/t5-efficient-large"], [0.001], output_dir)
+    write_experiments_yalms(["google/t5-efficient-large","google/t5-efficient-base", "google/t5-efficient-small"], [0.001], output_dir)
 
 if __name__ == "__main__":
     main()
