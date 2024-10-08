@@ -57,7 +57,7 @@ def write_experiments_yalms(a_model_list, a_lr_list, output_dir):
             prediction_length = 768
             max_steps = 10000
             save_steps = 2000
-            per_device_train_batch_size = 8
+            per_device_train_batch_size = 2
             learning_rate = a_lr
             random_init = "false"
             shuffle_buffer_length = 10000
@@ -79,7 +79,7 @@ learning_rate: {learning_rate}
 optim: adamw_torch_fused
 num_samples: 20
 shuffle_buffer_length: {shuffle_buffer_length}
-gradient_accumulation_steps: 1
+gradient_accumulation_steps: 2
 model_id: {model}
 model_type: seq2seq
 random_init: {random_init}
