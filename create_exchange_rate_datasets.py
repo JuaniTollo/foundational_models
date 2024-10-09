@@ -97,16 +97,19 @@ ds = load_dataset("autogluon/chronos_datasets", "exchange_rate", split="train")
 ################################################ TRAINING NEW DATASET ###################################################
 directory_path = "datasets/training/"
 os.makedirs(directory_path, exist_ok=True)
-new_ds = filter_data_points(ds, 80)
+### FIX to prevent Data leakeadge for long term predictions ###
+new_ds = filter_data_points(ds, 96)
 # Convert the Dataset to a pandas DataFrame
 new_df = to_pandas(new_ds)
 new_dataset = changingDatasetStructure(new_df)
 new_ds2 = Dataset.from_pandas(new_dataset, split = ds.split, features = ds.features, info =ds.info)
 # Convert to Arrow format new dataset
 convert_exchange_dataset_to_arrow(new_ds2, str(current_directory / "datasets/training/newExchangeRateTraining.arrow"))
+
 ################################################ TRAINING ORIGINAL DATASET ###################################################
 # Convert to Arrow format old dataset
 convert_exchange_dataset_to_arrow(ds, str(current_directory / "datasets/training/exchangeRateTraining.arrow"))
+
 ################################################ EVALUATION NEW DATASET ###################################################
 ### FIX BUG ###
 #new_ds_evaluation = filter_data_points(ds, 80)

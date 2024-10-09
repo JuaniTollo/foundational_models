@@ -1,51 +1,47 @@
-## At same level of foundational models...
+# Setting Up Chronos Forecasting Environment
+
+Follow these steps to clone the repositories, install the dependencies, and run the training scripts.
+
+## Step 1: Clone the Repositories
+
+Make sure you're at the same directory level as `foundational_models` before cloning:
+Clone the official Chronos Forecasting repository
+```
 git clone https://github.com/amazon-science/chronos-forecasting.git
-cd chronos-forecasting
-pip install -e ".[evaluation]"
-pip install -e ".[training]"
+```
+Clone your custom branch of Chronos Forecasting
+```
+git clone --branch new-train https://github.com/JuaniTollo/chronos-forecasting.git /content/chronos-forecasting --quiet
+```
 
+## Step 2: Install Dependencies
 
-## Create new datasets and configs files
-
-We import exchange rate dataset and we create new exchange rante datasets
-
-`python create_excghange_rate_datasets.py`
-
-## Evaluation for the original dataset with the original model weights
-
-python evaluation/evaluate.py evaluation/configs/exchange_zero_shot_test.yaml evaluation/results/chronos-t5-small-zero-shotORIGINAL.csv     --chronos-model-id "amazon/chronos-t5-small"     --batch-size=32     --device=cuda:0     --num-samples 20
-
-## Evaluation for new dataset but original weights
-
-python evaluation/evaluate.py /home/juantollo/foundational_models/chronos-forecasting/scripts/evaluation/configs/new_exchange_rate_zero_shot.yaml evaluation/results/chronos-t5-small-zero-shot.csv     --chronos-model-id "/home/juantollo/foundational_models/chronos-forecasting/scripts/er_models/5000"    --batch-size=3
-
-## VM Settings
-
-```python
+Install the dependencies from the requirements file
+```
 pip install -r requirements.txt
-
+```
+Upgrade the dependencies, ignoring any pre-installed packages
+```
 pip install --upgrade --no-deps --ignore-installed -r requirements.txt
-
+```
+## Step 3: Install Chronos in Editable Mode
+Navigate into the chronos-forecasting directory and install it in editable mode
+```
+cd ./chronos-forecasting
+```
+Install Chronos with both evaluation and training extras
+```
 pip install -e .[evaluation,training]
 ```
-
-## Tests Evaluate
-
-python evaluation/evaluate.py evaluation/configs/exchange_zero_shot_test.yaml evaluation/results/chronos-t5-small-zero-shot_test.csv --chronos-model-id amazon/chronos-t5-small --batch-size 2 --device cuda:0 --num-samples 1
-
-## Test train new dataset
+## Step 4: Run Configuration and Dataset Script
+Run the script to create the necessary configurations and datasets
 
 ```
-## `CUDA_VISIBLE_DEVICES=0 python training/train.py --config /home/juantollo/foundational_models/chronos-forecasting/scripts/training/configs/configs_new_dataset_context_960_pred_240_lr_0.001.yaml     --model-id amazon/chronos-t5-small     --no-random-init     --max-steps 1000     --learning-rate 0.001`
+run /home/juantollo/foundational_models/foundational_models/create_config_and_datasets.sh
 ```
+## Step 5: Run the Model
+Now, you can run the model by specifying the model size you prefer (tiny, small, base, or large)
 
-## Test train original dataset
-
-```sh
-# Fine-tune `amazon/chronos-t5-small` for 1000 steps with initial learning rate of 1e-3
-CUDA_VISIBLE_DEVICES=0 python training/train.py --config /home/juantollo/foundational_models/chronos-forecasting/scripts/training/configs/chronos-t5-small.yaml \
-    --model-id amazon/chronos-t5-small \
-    --no-random-init \
-    --max-steps 1000 \
-    --learning-rate 0.001
+```
+run /home/juantollo/foundational_models/foundational_models/run.sh large
 ```
