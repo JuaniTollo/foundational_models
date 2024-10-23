@@ -30,7 +30,7 @@ yalms = {"new_exchange_rate_in_domain": new_exchange_rate_in_domain,
          } 
 
 for yalm in yalms.keys():
-    with open(f"../chronos-forecasting/scripts/evaluation/configs/{yalm}.yaml", "w") as file:
+    with open(f"./evaluation/configs/{yalm}.yaml", "w") as file:
         file.write(yalms[yalm])
     print(f"Archivo YAML {yalm} guardado como config.yaml")
 
@@ -109,7 +109,7 @@ use_eos_token: true
 
 def main():
     # Define the directory containing the .yaml files
-    output_dir = "../chronos-forecasting/scripts/training/configs"
+    output_dir = "training/configs"
     # Erase old YAMLs if necessary
     erased_not_experiment_yammls(output_dir)
     # Write new YAML files

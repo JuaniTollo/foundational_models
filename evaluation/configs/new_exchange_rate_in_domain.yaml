@@ -1,0 +1,6 @@
+
+- name: 'default'
+  hf_repo: juantollo/newExchangeRate
+  offset: -4128
+  prediction_length: 768
+  num_rolls: 1

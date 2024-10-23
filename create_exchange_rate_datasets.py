@@ -1,6 +1,6 @@
 import pdb
 from datasets import load_dataset, Dataset, load_from_disk
-from utils import to_pandas, convert_to_arrow
+from utils.utils import to_pandas, convert_to_arrow
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -94,6 +94,7 @@ def filter_data_points(original_ds, num_points_to_omit):
 current_file_path = Path(__file__).resolve()
 current_directory = current_file_path.parent
 ds = load_dataset("autogluon/chronos_datasets", "exchange_rate", split="train")
+
 ################################################ TRAINING NEW DATASET ###################################################
 directory_path = "datasets/training/"
 os.makedirs(directory_path, exist_ok=True)
@@ -125,6 +126,7 @@ login(token="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")
 api = HfApi()
 repo_url = api.create_repo(repo_id="juantollo/newExchangeRate", repo_type="dataset", private=True, exist_ok=True)
 new_dataset_evaluation.push_to_hub("juantollo/newExchangeRate")
+
 ################################################ TEST ################################################ 
 # Convert the Dataset to a pandas DataFrame
 df_evaluation = to_pandas(ds)
