@@ -1,0 +1,5 @@
+2024-10-24 16:59:44,812 - Chronos Evaluation - INFO - Loading exchange_rate
+2024-10-24 16:59:46,655 - Chronos Evaluation - INFO - Generating forecasts for exchange_rate (8 time series)
+0it [00:00, ?it/s]1it [00:14, 14.09s/it]1it [00:14, 14.09s/it]
+2024-10-24 17:00:00,750 - Chronos Evaluation - INFO - Evaluating forecasts for exchange_rate
+0it [00:00, ?it/s]8it [00:00, 294.06it/s]
