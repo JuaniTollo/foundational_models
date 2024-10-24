@@ -4,8 +4,4 @@
   offset: -4128
   prediction_length: 768
   num_rolls: 1
-  chronos_model_id: juantollo/checkpoint-final_20241009-225937
-  batch_size: 32
-  device: cuda:0
-  num_samples: 20
 

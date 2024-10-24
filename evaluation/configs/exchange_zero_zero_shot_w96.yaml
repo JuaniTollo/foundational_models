@@ -3,7 +3,3 @@
   offset: -516
   prediction_length: 96
   num_rolls: 1
-  chronos_model_id: amazon/chronos-t5-large
-  batch_size: 32
-  device: cuda:0
-  num_samples: 20
